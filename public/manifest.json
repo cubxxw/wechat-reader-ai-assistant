@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "微信读书AI助手",
+  "version": "1.0.0",
+  "description": "AI驱动的微信读书助手,帮助快速理解和总结书籍内容",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://weread.qq.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://weread.qq.com/*"],
+      "js": ["contentScript.js"]
+    }
+  ]
+}
