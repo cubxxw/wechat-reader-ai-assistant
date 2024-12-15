@@ -199,10 +199,6 @@
   min-width: 120px;
 }
 
-.weread-ai-bot:hover .ai-bot-menu {
-  display: block;
-}
-
 .menu-item {
   padding: 8px 16px;
   cursor: pointer;

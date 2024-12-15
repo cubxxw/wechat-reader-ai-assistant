@@ -23,7 +23,7 @@ class ContentExtractor {
     aiBot.className = 'weread-ai-bot';
     aiBot.innerHTML = `
       <div class="ai-bot-icon">🤖</div>
-      <div class="ai-bot-menu">
+      <div class="ai-bot-menu" style="display: none;">
         <div class="menu-item" id="summarize">
           <span>生成章节摘要</span>
         </div>
@@ -41,11 +41,33 @@ class ContentExtractor {
     const aiBot = document.querySelector('.weread-ai-bot');
     if (!aiBot) return;
 
+    const icon = aiBot.querySelector('.ai-bot-icon');
+    const menu = aiBot.querySelector('.ai-bot-menu');
+
+    icon?.addEventListener('click', () => {
+      if (menu instanceof HTMLElement) {
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+      }
+    });
+
     aiBot.querySelector('#summarize')?.addEventListener('click', async () => {
+      const aiBot = document.querySelector('.weread-ai-bot');
+      if (!aiBot) return;
+
       const icon = aiBot.querySelector('.ai-bot-icon');
       if (!(icon instanceof HTMLElement)) return;
       
       try {
+        if (!chrome.runtime) {
+          throw new Error('Chrome runtime not available');
+        }
+
+        // 先检查配置
+        const config = await chrome.storage.sync.get('config');
+        if (!config.config?.apiKey) {
+          throw new Error('请先在插件设置中配置 OpenAI API Key');
+        }
+
         icon.textContent = '⏳';
         const content = this.getCurrentChapterContent();
         
@@ -53,6 +75,11 @@ class ContentExtractor {
           type: 'SUMMARIZE',
           content
         }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('Runtime error:', chrome.runtime.lastError);
+            throw new Error(chrome.runtime.lastError.message);
+          }
+          
           if (response.summary) {
             this.showSummaryModal(response.summary);
           } else {
@@ -61,7 +88,7 @@ class ContentExtractor {
         });
       } catch (error) {
         console.error('摘要生成失败:', error);
-        alert('摘要生成失败，请稍后重试');
+        alert(error instanceof Error ? error.message : '摘要生成失败，请稍后重试');
       } finally {
         icon.textContent = '🤖';
       }
