@@ -19,8 +19,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://weread.qq.com/*"],
-      "js": ["contentScript.js"]
+      "matches": ["https://weread.qq.com/web/reader/*"],
+      "js": ["contentScript.js"],
+      "css": ["styles/global.css"]
     }
   ]
 }

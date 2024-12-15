@@ -159,3 +159,58 @@
   background: rgba(24,144,255,0.1);
   border-radius: 4px;
 }
+
+.weread-ai-bot {
+  position: fixed;
+  right: 30px;
+  bottom: 30px;
+  z-index: 9999;
+}
+
+.ai-bot-icon {
+  width: 48px;
+  height: 48px;
+  background: #1890ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s;
+}
+
+.ai-bot-icon:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+.ai-bot-menu {
+  position: absolute;
+  bottom: 60px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  padding: 8px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  display: none;
+  min-width: 120px;
+}
+
+.weread-ai-bot:hover .ai-bot-menu {
+  display: block;
+}
+
+.menu-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #333;
+}
+
+.menu-item:hover {
+  background: rgba(24,144,255,0.1);
+  color: #1890ff;
+}

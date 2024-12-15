@@ -19,67 +19,55 @@ class ContentExtractor {
   }
 
   static injectToolbar() {
-    const toolbarContainer = document.querySelector('.readerTopBar');
-    if (!toolbarContainer) return;
-
-    const toolbar = document.createElement('div');
-    toolbar.className = 'weread-ai-tools';
-    toolbar.innerHTML = `
-      <div id="summarize" class="tool-item" title="AI生成本章摘要">
-        <i class="icon-summary"></i>
-        <span>生成摘要</span>
-      </div>
-      <div id="extract" class="tool-item" title="提取重点内容">
-        <i class="icon-extract"></i>
-        <span>提取重点</span>
+    const aiBot = document.createElement('div');
+    aiBot.className = 'weread-ai-bot';
+    aiBot.innerHTML = `
+      <div class="ai-bot-icon">🤖</div>
+      <div class="ai-bot-menu">
+        <div class="menu-item" id="summarize">
+          <span>生成章节摘要</span>
+        </div>
+        <div class="menu-item" id="extract">
+          <span>提取重点内容</span>
+        </div>
       </div>
     `;
     
-    toolbarContainer.appendChild(toolbar);
+    document.body.appendChild(aiBot);
     this.bindEvents();
   }
 
   private static bindEvents() {
-    document.getElementById('summarize')?.addEventListener('click', this.handleSummarize);
-    document.getElementById('extract')?.addEventListener('click', this.handleExtract);
-  }
+    const aiBot = document.querySelector('.weread-ai-bot');
+    if (!aiBot) return;
 
-  private static async handleSummarize() {
-    const button = document.getElementById('summarize');
-    if (!(button instanceof HTMLButtonElement)) return;
-    
-    try {
-      button.disabled = true;
-      button.textContent = '生成中...';
+    aiBot.querySelector('#summarize')?.addEventListener('click', async () => {
+      const icon = aiBot.querySelector('.ai-bot-icon');
+      if (!(icon instanceof HTMLElement)) return;
       
-      const content = ContentExtractor.getCurrentChapterContent();
-      const prompt = `
-  请对以下内容进行摘要，要求：
-  1. 提炼核心观点和关键信息
-  2. 保持逻辑清晰，层次分明
-  3. 语言简洁准确
-  4. 突出重要概念和结论
-  
-  内容：${content}
-  `;
-  
-      chrome.runtime.sendMessage({
-        type: 'SUMMARIZE',
-        content: prompt
-      }, (response) => {
-        if (response.summary) {
-          ContentExtractor.showSummaryModal(response.summary);
-        } else {
-          throw new Error(response.error || '生成失败');
-        }
-      });
-    } catch (error) {
-      console.error('摘要生成失败:', error);
-      alert('摘要生成失败，请稍后重试');
-    } finally {
-      button.disabled = false;
-      button.textContent = '生成摘要';
-    }
+      try {
+        icon.textContent = '⏳';
+        const content = this.getCurrentChapterContent();
+        
+        chrome.runtime.sendMessage({
+          type: 'SUMMARIZE',
+          content
+        }, (response) => {
+          if (response.summary) {
+            this.showSummaryModal(response.summary);
+          } else {
+            throw new Error(response.error || '生成失败');
+          }
+        });
+      } catch (error) {
+        console.error('摘要生成失败:', error);
+        alert('摘要生成失败，请稍后重试');
+      } finally {
+        icon.textContent = '🤖';
+      }
+    });
+
+    aiBot.querySelector('#extract')?.addEventListener('click', this.handleExtract);
   }
 
   static showSummaryModal(summary: string) {
