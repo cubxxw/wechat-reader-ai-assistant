@@ -9,6 +9,8 @@ class APIManager {
     apiBase: 'https://api.openai.com/v1'
   };
 
+  private static cache: { [prompt: string]: string } = {};
+
   static setConfig(config: Partial<OpenAIConfig>) {
     this.config = { ...this.config, ...config };
   }
@@ -17,9 +19,13 @@ class APIManager {
     return this.config;
   }
 
-  static async callOpenAI(prompt: string) {
+  static async callOpenAI(prompt: string): Promise<any> {
+    if (this.cache[prompt]) {
+      return { choices: [{ message: { content: this.cache[prompt] } }] };
+    }
+
     try {
-      const response = await fetch(`${this.config.apiBase}/v1/chat/completions`, {
+      const response = await fetch(`${this.config.apiBase}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,7 +39,20 @@ class APIManager {
           }]
         })
       });
-      return await response.json();
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || 'API请求失败');
+      }
+
+      const data = await response.json();
+      if (data.choices && data.choices.length > 0) {
+        const summary = data.choices[0].message.content.trim();
+        this.cache[prompt] = summary; // 缓存摘要
+        return data;
+      } else {
+        throw new Error('API未返回有效的摘要。');
+      }
     } catch (error) {
       console.error('API调用失败:', error);
       throw error;
